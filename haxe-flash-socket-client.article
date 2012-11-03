@@ -1,0 +1,40 @@
+title: Haxe Flash Socket Client
+date: 2012-11-03
+id: haxe-flash-socket-client
+tags: haxe, socket, network
+
+Рассмотрим работу с сетью в *haxe* и *flash*. Код достаточно прост:
+
+```javascript
+// Создать сокет и подключиться
+var c:Socket = new Socket();
+c.connect("127.0.0.1", 9000);
+```
+
+Поскольку у сокетов на стороне *flash* нет простого метода ```writeString```, но имеется ```writeUTF```, который не может быть использован, поскольку текущая версия сервера с предыдущей статьи не поддерживает *UTF* строки. Поэтому реализуем свою функцию записи простой строки в сокет:
+
+```javascript
+public function writeString(text:String,c:Socket) {
+  // Записать строку по байту.
+  for (i in 0...text.length) {
+    c.writeByte(StringTools.fastCodeAt(text, i));
+  }
+
+  // Записать символ конца строки.
+  c.writeByte(13);
+  c.writeByte(10);
+}
+```
+
+А теперь выполним запись строк в сокет.
+
+```javascript
+writeString("test 1", c);
+writeString("second line", c);
+writeString("one more line", c);
+
+// Эта строка завершит работу сервера.
+writeString("q", c);
+```
+
+Теперь нужно запустить сервер, а после этого запустить клиент.
