@@ -1,0 +1,173 @@
+title: Настройка почты с Mutt в ArchLinux
+date: 2012-11-5
+id: archlinux-mutt-getmail-msmtp
+
+Получение почты
+---------------
+
+Для получения почты будем использовать *getmail*. Установим его:
+
+```
+sudo pacman -S getmail
+mkdir ~/.getmail
+nano ~/.getmail/getmailrc
+```
+
+В файл настроек вставим следующий текст:
+
+```
+[retriever]
+type = SimpleIMAPRetriever
+server = imap.locum.ru
+port = 143
+username = me@domain.org
+password = my_password
+
+[destination]
+type = Maildir
+path = ~/.mail/
+
+[options]
+delete = true
+message_log = ~/.getmail/log-foreman-example
+```
+
+В качестве *retriever/type* можно использовать следующее (в зависимости от предпочтений и настроек сервера):
+
+ * SimpleSMTPRetriever
+ * SimpleSMTPSSLRetriever
+ * полный список: http://pyropus.ca/software/getmail/configuration.html#conf-retriever
+
+Также следует указать порт, почту и пароль. Проверить работу можно выполнив:
+
+```
+$ getmail
+getmail version 4.35.0
+Copyright (C) 1998-2012 Charles Cazabon.  Licensed under the GNU GPL version 2.
+SimpleIMAPRetriever:me@italchemist.org@imap.locum.ru:143:
+  0 messages (0 bytes) retrieved, 0 skipped
+```
+
+Отправка почты
+--------------
+
+Установим *msmtp*:
+
+```
+sudo pacman -S msmtp
+nano ./.msmtprc
+```
+
+В файл конфигурации вставим следующий текст:
+
+```
+# Accounts will inherit settings from this section
+defaults
+auth             on
+tls              on
+tls_trust_file   /usr/share/ca-certificates/mozilla/Thawte_Premium_Server_CA.crt
+
+# A first gmail address
+account        gmail
+host           smtp.gmail.com
+port           587
+from           username@gmail.com
+user           username@gmail.com
+password       password
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+
+# A freemail service
+account    freemail
+host       smtp.freemail.example
+from       joe_smith@freemail.example
+user       joe.smith
+password   secret
+
+# Set a default account
+account default : gmail
+```
+
+Нужно исправить под свои логин/пароль. После сохранения файла установим права, иначе *msmtp* не будет работать:
+
+```
+chmod 600 ~/.msmtprc
+```
+
+Проверим работу:
+
+```
+msmtp -a account send_to@domain.ru
+from:bill.gates@microsoft.com
+subject:win8
+
+Did you see that? I'm on your side now. ArchLinux is awesome.
+```
+
+На *send_to@domain.ru* должно прийти письмо.
+
+
+Настройка Mutt
+--------------
+
+Установим *mutt*:
+
+```
+sudo pacman -S mutt
+nano ./.muttrc
+```
+
+В файл конфигурации вставим следующий текст:
+
+```
+set mbox_type=maildir
+set folder=$HOME/.mail
+set spoolfile=+/
+set header_cache=~/.hcache
+set sendmail="/usr/bin/msmtp"
+set from="me@domain.org"
+```
+
+Тут указывается что почта будет отправляться посредством *msmtp*, папка для почты *~/.mail/* и адрес отправителя.
+
+Нужно создать нескоько папок, где будет храниться почта:
+
+```
+mkdir -p ~/mail/{cur,new,tmp}
+```
+
+Всё вместе
+----------
+
+Получим почту и откроем *mutt*:
+
+```
+getmail
+mutt
+```
+
+Должны увидеть все полученные письма. Для создания и отправки письма нужно нажать *m*. Далее следовать инструкции.
+
+Автоматическое получение писем
+------------------------------
+
+Добавим новую задачу в crontab:
+
+```
+crontab -e
+```
+
+Нужно вставить такую строку
+
+```
+*/10 * * * * /usr/bin/getmail
+```
+
+Теперь *getmail* будет запускаться каждые 10 минут.
+
+Также надо включить *crond* если до этого не был:
+
+```
+sudo systemctl enable cronie.service
+```
+
+Готово!
