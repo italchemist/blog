@@ -1,9 +1,9 @@
+id: haxe-flash-socket-client
 title: Haxe Flash Socket Client
 date: 2012-11-03
-id: haxe-flash-socket-client
 tags: haxe, socket, network
 
-Рассмотрим работу с сетью в *haxe* и *flash*. Код достаточно прост:
+Разработка сервера была выполнена в [@article:haxe-socket-server|предыдущей статье]; В этой статье рассмотрим работу с сетью в *haxe* и *flash*. Код достаточно прост:
 
 ```javascript
 // Создать сокет и подключиться
