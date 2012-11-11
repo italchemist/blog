@@ -3,7 +3,7 @@ title: Haxe Socket Server
 date: 2012-11-03
 tags: haxe, socket, network
 
-Рассмотрим работу с сетью в *haxe*. Для начала установим инструменты для нативной разработки:
+Рассмотрим работу с сетью в *haxe* и *nme*. Для начала установим инструменты для нативной разработки:
 
 ```
 nme setup windows
@@ -37,13 +37,20 @@ c.output.writeString("hello world");
  * *telnet*
  * Устанавливаем соединение выполнив: ```open 127.0.0.1 9000```
 
+[@image:haxe-socket-server/telnet-open.png]
+
 В окне *telnet* должны получить ответ с сервера:
 
-```
-hello world
-```
+[@image:haxe-socket-server/telnet-hello-world.png]
 
-Теперь получение сообщения с клиента:
+В сокет можно писать не только строки, но данные различного типа. Всё эт осуществляется посредством записи в [@link:www.haxe.org/api/haxe/io/output|поток]. Вот некоторые из доступных функций.
+
+ * writeByte
+ * writeFloat
+ * writeDouble
+ * и т.д.
+
+Теперь реализуем получение сообщения с клиента:
 
 ```javascript
 while (true) {
