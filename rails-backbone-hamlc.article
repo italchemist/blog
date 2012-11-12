@@ -1,0 +1,103 @@
+id: rails-backbone-hamlc
+title: Rails, Backbone и Hamlc
+date: 2012-11-12
+
+Недавно я прикручивал *Backbone* и *hamlc* к *Rails* и наткнулся на несколько проблем. Решением оных я и хочу поделиться.
+
+Сначала создадим пустое приложение:
+
+```
+rails new blog -T
+cd ./blog
+```
+
+В *Gemfile* добавим следующие гемы:
+
+```
+group :assets do
+  gem 'haml_coffee_assets'
+end
+
+gem 'haml-rails'
+gem 'rails-backbone'
+```
+
+Установим гемы: ```bundle install```. Согласно документации *rails-backbone* выполним установку:
+
+```
+rails g backbone:install
+```
+
+После этого будет созданы основыне папки *backbone*. Создадим простую модель:
+
+```
+rails g scaffold Article title:string content:text
+rails g backbone:scaffold Article title:string content:text
+rake db:migrate
+```
+
+Это сгенерирует код для *Rails* и *Backbone*. Поскольку отображением форм теперь занимается *backbone*, то ненужные страницы можно удалить (останется только *index*):
+
+```
+rm ./app/views/articles/edit.html.haml
+rm ./app/views/articles/show.html.haml
+rm ./app/views/articles/new.html.haml
+rm ./app/views/articles/_form.html.haml
+```
+
+На странице *index* поместим такой код:
+
+```
+%div#articles
+
+:javascript
+  $(function() {
+    // Blog - имя приложения
+    // ArticlesRouter - роутер который был сгенерирован
+    window.router = new Blog.Routers.ArticlesRouter({articles: #{@articles.to_json.html_safe}});
+    Backbone.history.start();
+  });
+```
+
+Теперь можно запустить приложение и проверить работу. Однако при попытке обновить модель получим ошибку: *Can't mass-assign protected attributes: created_at, id, updated_at*. Для исправления необходимо отредактировать модель *backbone*, удалив *paramRoot*:
+
+```
+nano ./app/assets/javascripts/backbone/models/article.js.coffe
+```
+
+Модель теперь выглядит так:
+
+```
+class Blog.Models.Article extends Backbone.Model
+  //paramRoot: 'article' удалить
+
+  defaults:
+    title: null
+    content: null
+```
+
+Hamlc и Backbone
+----------------
+
+Шаблоны *backbone* можно писать на *haml*. Для этого создадим файл *./app/assets/javascript/backbone/templates/index.jst.hamlc* (старый *ejs* нужно будет удалить):
+
+```
+%h1 Articles
+
+%table
+  %th title
+  %th content
+  %th
+  %th
+  %th
+
+%a{:href=>"/articles#new"} New
+```
+
+И добавим в *./app/assets/javascripts/application.js* строку:
+
+```
+//= require hamlcoffee
+```
+
+Теперь всё готово!
