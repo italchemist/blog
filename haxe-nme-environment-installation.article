@@ -1,0 +1,16 @@
+id: haxe-nme-environment-installation
+title: Установка среды разработки для Haxe и Nme
+date: 2012-11-12
+
+Установка среды для разработки под Haxe/Nme не так сложна.
+
+ * Для начала [@link:www.haxenme.org/download/|скачаем] и установим *Nme*.
+ * В качестве рабочей среды я рекомендую [@link:www.flashdevelop.org/|flashdevelop]
+ * _FlashDevelop_ имеет некоторые зависимости, которые нужно установить заранее: 
+   * [@link:www.microsoft.com/en-us/download/details.aspx?id=1639|.net2]
+   * [@link:www.adobe.com/support/flashplayer/downloads.html|ActiveX Debug Flash Player] для отладки
+   * [@link:www.oracle.com/technetwork/java/javase/downloads/index.html|java]
+
+После установки можно создать проект из шаблона *NME Project*.
+
+[@image:haxe-nme-environment-installation/flashdevelop.png]
