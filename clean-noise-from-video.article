@@ -1,0 +1,39 @@
+id: clean-noise-from-video
+title: Удаление шума с видео
+date: 2012-11-14
+
+При записи скринкастов на видео бывает фоновый шум. Я расскажу как легко его моно удалить в *archlinux*. Допустим у нас уже есть записанное видео *screencast.ogv*. Итак:
+
+Извлекём звуковую дорожку в отдельный файл: 
+
+```
+ffmpeg -i screencast.ogv -acodec copy -vn audio-temp.ogg
+```
+
+Извлечём из него кусок содержащий шум: 
+
+```
+ffmpeg -i audio-temp.ogg -vn -ss 00:00:00 -t 00:00:01 audio-temp-noise.ogg
+```
+
+Где: *ss*- время в формате h:m:s.ms от начала, *t* - длительность. Эти величины нуно выбрать таким образом, чтобы в данном диапазоне был только шум.
+
+Сгенерируем шумовой профиль: 
+
+```
+sox audio-temp-noise.ogg -n noiseprof noise.prof
+```
+
+Почистим аудио-дорожку: 
+
+```
+sox audio-temp.ogg audio-temp.ogg-clean.ogg noisered noise.prof 0.1
+```
+
+Сведём аудио и видео: 
+
+```
+ffmpeg -i screencast.ogv -i audio-temp-clean.ogg -map 0:1 -map 1:0 -acodec copy -vcodec copy screencast-clean.ogv
+```
+
+Готово.
