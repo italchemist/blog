@@ -27,13 +27,40 @@ sox audio-temp-noise.ogg -n noiseprof noise.prof
 Почистим аудио-дорожку: 
 
 ```
-sox audio-temp.ogg audio-temp.ogg-clean.ogg noisered noise.prof 0.1
+sox audio-temp.ogg audio-clean.ogg noisered noise.prof 0.1
 ```
 
 Сведём аудио и видео: 
 
 ```
 ffmpeg -i screencast.ogv -i audio-temp-clean.ogg -map 0:1 -map 1:0 -acodec copy -vcodec copy screencast-clean.ogv
+```
+
+Обрезать кусок видео можно таким образом:
+
+```
+ffmpeg -ss 00:00:0 -i input.ogv -t $2 -vcodec copy -acodec copy output.ogv
+```
+
+Весь процесс я собрал в один скрипт:
+
+```
+ffmpeg -i $1 -acodec copy -vn $1-audio-original.ogg
+sox $1-audio-original.ogg $1-audio-clean.ogg noisered noise.prof 0.1
+ffmpeg -i $1 -i $1-audio-clean.ogg -map 0:1 -map 1:0 -acodec copy -vcodec copy $1-clean.ogv
+
+rm ./$1-audio-original.ogg
+rm ./$1-audio-clean.ogg
+
+ffmpeg -ss 00:00:0 -i ./$1-clean.ogv -t $2 -vcodec copy -acodec copy $1-done.ogv
+
+rm ./$1-clean.ogv
+```
+
+Использовать так: (первый параметр - входное видео, второй - длительность)
+
+```
+clean.sh input.ogv 00:12:34
 ```
 
 Готово.
